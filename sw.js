@@ -1,5 +1,5 @@
 // Bump VERSION whenever you change a file, so phones pick up the update.
-const VERSION = "bag-v2";
+const VERSION = "bag-v3";
 const SHELL = [
   "./",
   "./index.html",
