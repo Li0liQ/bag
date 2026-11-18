@@ -1714,39 +1714,6 @@
                 } catch (e) {}
             }
 
-            let voice = null;
-            function pickVoice() {
-                if (!("speechSynthesis" in window)) return;
-                const vs = speechSynthesis
-                    .getVoices()
-                    .filter((v) => /^en/i.test(v.lang));
-                const preferred = [
-                    /natural/i,
-                    /enhanced/i,
-                    /premium/i,
-                    /google uk english female/i,
-                    /google us english/i,
-                    /siri/i,
-                    /samantha/i,
-                    /karen/i,
-                    /moira/i,
-                    /tessa/i,
-                    /female/i,
-                ];
-                for (const rx of preferred) {
-                    const match = vs.find((v) => rx.test(v.name));
-                    if (match) {
-                        voice = match;
-                        return;
-                    }
-                }
-                voice = vs[0] || null;
-            }
-            if ("speechSynthesis" in window) {
-                pickVoice();
-                speechSynthesis.onvoiceschanged = pickVoice;
-            }
-
             const CHEERS = [
                 "Woohoo! You got it!",
                 "Yay! Amazing job!",
@@ -1754,19 +1721,67 @@
                 "Awesome! You found it!",
             ];
 
-            function say(text, excited = false) {
-                if (!soundOn || !("speechSynthesis" in window)) return;
+            function audioKey(text) {
+                return text
+                    .toLowerCase()
+                    .replace(/[^\p{L}\p{N}]+/gu, "-")
+                    .replace(/^-|-$/g, "");
+            }
+
+            function speakFallback(lines, excited = false) {
+                if (!("speechSynthesis" in window)) return;
                 speechSynthesis.cancel();
-                const clean = text
-                    .replace(/[^\p{L}\p{N}\s?!.,'-]/gu, "")
-                    .replace(/\s+/g, " ")
-                    .trim();
-                if (!clean) return;
-                const u = new SpeechSynthesisUtterance(clean);
-                if (voice) u.voice = voice;
-                u.rate = excited ? 1.14 : 1.05;
-                u.pitch = excited ? 1.15 : 1.1;
+                const u = new SpeechSynthesisUtterance(lines.join(" "));
+                u.rate = excited ? 1.05 : 1.0;
+                u.pitch = 1.0;
                 speechSynthesis.speak(u);
+            }
+
+            let activeVoiceAudio = null;
+            let voiceSeq = 0;
+
+            function stopVoice() {
+                voiceSeq++;
+                if (activeVoiceAudio) {
+                    activeVoiceAudio.pause();
+                    activeVoiceAudio.currentTime = 0;
+                    activeVoiceAudio = null;
+                }
+                if ("speechSynthesis" in window) speechSynthesis.cancel();
+            }
+
+            function say(input, excited = false) {
+                if (!soundOn) return;
+                const lines = (Array.isArray(input) ? input : [input])
+                    .map((t) =>
+                        t
+                            .replace(/[^\p{L}\p{N}\s?!.,'-]/gu, "")
+                            .replace(/\s+/g, " ")
+                            .trim(),
+                    )
+                    .filter(Boolean);
+                if (!lines.length) return;
+
+                stopVoice();
+                const seq = voiceSeq;
+
+                const playAt = (idx) => {
+                    if (!soundOn || seq !== voiceSeq || idx >= lines.length)
+                        return;
+                    const audio = new Audio(
+                        `./audio/${audioKey(lines[idx])}.mp3`,
+                    );
+                    activeVoiceAudio = audio;
+                    audio.addEventListener("ended", () => playAt(idx + 1), {
+                        once: true,
+                    });
+                    audio.play().catch(() => {
+                        if (seq === voiceSeq)
+                            speakFallback(lines.slice(idx), excited);
+                    });
+                };
+
+                playAt(0);
             }
 
             /* ===================== elements ===================== */
@@ -2173,7 +2188,7 @@
                 blip("win");
                 setTimeout(() => {
                     if (phase === "reveal") {
-                        say(`${cheer} It's ${hidden.phrase}!`, true);
+                        say([cheer, `It's ${hidden.phrase}!`], true);
                     }
                 }, 420);
                 const c = $("confetti");
@@ -2461,8 +2476,7 @@
                 try {
                     localStorage.setItem("bag-sound", soundOn ? "on" : "off");
                 } catch (e) {}
-                if (!soundOn && "speechSynthesis" in window)
-                    speechSynthesis.cancel();
+                if (!soundOn) stopVoice();
                 paintSound();
                 blip("pop");
             });

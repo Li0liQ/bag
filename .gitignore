@@ -1,0 +1,9 @@
+# Node dependencies & logs
+node_modules/
+npm-debug.log*
+
+# Hugging Face / Transformers.js / ONNX local model caches
+.cache/
+.huggingface/
+models/
+*.onnx

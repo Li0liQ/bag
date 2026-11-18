@@ -1,0 +1,34 @@
+{
+  "name": "bag",
+  "version": "1.0.0",
+  "description": "Bag – a guessing game for little ones",
+  "keywords": [
+    "bag",
+    "game",
+    "toddler",
+    "guessing"
+  ],
+  "homepage": "https://github.com/Li0liQ/bag#readme",
+  "bugs": {
+    "url": "https://github.com/Li0liQ/bag/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Li0liQ/bag.git"
+  },
+  "license": "ISC",
+  "author": "Li0liQ",
+  "type": "commonjs",
+  "main": "index.html",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-audio": "rm -f ./audio/*.mp3 && node generate-audio.mjs"
+  },
+  "devDependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "kokoro-js": "^1.2.1"
+  }
+}
