@@ -25,7 +25,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-audio": "rm -f ./audio/*.mp3 && node generate-audio.mjs"
+    "assets": "node generate-assets.mjs",
+    "build": "npm run assets"
   },
   "devDependencies": {
     "@breezystack/lamejs": "^1.2.7",

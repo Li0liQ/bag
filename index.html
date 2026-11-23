@@ -86,6 +86,7 @@
             html,
             body {
                 height: 100%;
+                height: 100dvh;
                 margin: 0;
             }
             :root {
@@ -122,7 +123,8 @@
 
             .app {
                 height: 100%;
-                max-width: 560px;
+                height: 100dvh;
+                max-width: 680px;
                 margin: 0 auto;
                 display: flex;
                 flex-direction: column;
@@ -148,6 +150,15 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
+                border: 0;
+                background: none;
+                padding: 4px 8px 4px 2px;
+                border-radius: 14px;
+                cursor: pointer;
+                transition: transform 0.12s ease;
+            }
+            .logo:active {
+                transform: scale(0.94);
             }
             .logo svg {
                 width: 30px;
@@ -183,7 +194,7 @@
             }
             .prompt .big {
                 font-weight: 800;
-                font-size: clamp(22px, 6.2vw, 30px);
+                font-size: clamp(22px, 5vw, 32px);
                 line-height: 1.1;
             }
             .prompt .small {
@@ -191,6 +202,14 @@
                 font-size: 17px;
                 color: var(--soft);
                 margin-top: 2px;
+            }
+
+            /* ---------- main play area (vertical by default, side-by-side on iPad landscape) ---------- */
+            .play-area {
+                flex: 1 1 auto;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
             }
 
             /* ---------- stage with bag + items ---------- */
@@ -376,12 +395,17 @@
                 padding: 0;
             }
             .item svg,
+            .item img,
             .thing svg,
+            .thing img,
             .reveal-thing svg,
-            .lib-ic svg {
+            .reveal-thing img,
+            .lib-ic svg,
+            .lib-ic img {
                 width: 1em;
                 height: 1em;
                 display: block;
+                pointer-events: none;
             }
             .item.enter {
                 opacity: 0;
@@ -420,8 +444,8 @@
                 display: grid;
             }
             .lib-sheet {
-                width: min(100%, 520px);
-                height: min(86vh, 680px);
+                width: min(100%, 560px);
+                height: min(86dvh, 680px);
                 display: flex;
                 flex-direction: column;
                 background: var(--paper);
@@ -557,7 +581,7 @@
                 color: var(--soft);
             }
 
-            /* ---------- questions ---------- */
+            /* ---------- questions (two-tap card flip) ---------- */
             .panel {
                 flex: none;
                 display: none;
@@ -594,13 +618,17 @@
                     opacity 0.25s,
                     background-color 0.2s;
             }
-            .q-main {
+            .q:active {
+                transform: translateY(3px);
+                box-shadow: 0 1px 0 var(--ink);
+            }
+            .q-btn {
                 flex: 1;
                 display: flex;
                 align-items: center;
                 gap: 12px;
                 text-align: left;
-                padding: 6px 10px 6px 6px;
+                padding: 6px 12px 6px 6px;
                 border: 0;
                 background: none;
                 cursor: pointer;
@@ -608,10 +636,6 @@
                 font-size: 20px;
                 line-height: 1.15;
                 border-radius: 15px;
-            }
-            .q:not(.asked):active {
-                transform: translateY(3px);
-                box-shadow: 0 1px 0 var(--ink);
             }
             .q .ic {
                 flex: none;
@@ -623,34 +647,33 @@
                 font-size: 26px;
                 background: var(--sky);
             }
-            .q .ans {
+            .q .q-label {
+                flex: 1;
+            }
+            .q .repeat-btn {
                 flex: none;
+                width: 38px;
+                height: 38px;
+                margin: auto 6px auto 0;
+                border-radius: 12px;
+                border: 2.5px solid var(--ink);
+                background: var(--paper);
+                color: var(--paper-ink);
+                font-size: 18px;
                 display: none;
-                align-items: center;
-                gap: 4px;
-                margin: 5px;
-                padding: 0 12px;
-                border-radius: 13px;
-                border: 3px solid var(--ink);
+                place-items: center;
+                cursor: pointer;
+            }
+            body[data-helper="on"] .q.asked .repeat-btn {
+                display: grid;
+            }
+            body[data-helper="on"] .q.asked {
                 background: var(--sack);
                 color: #3b2a5c;
-                font-weight: 800;
-                font-size: 17px;
-                cursor: pointer;
-                touch-action: none;
             }
-            .q.asked {
-                background: color-mix(in srgb, var(--paper) 78%, var(--sack));
-            }
-            body[data-helper="on"] .q.asked .ans {
-                display: flex;
-            }
-            body:not([data-helper="on"]) .ans {
-                display: none !important;
-            }
-            .q.asked .ans span {
+            body[data-helper="on"] .q.asked .ic {
+                background: rgba(255, 255, 255, 0.65);
                 animation: nudge 1.4s ease-in-out infinite;
-                display: inline-block;
             }
             @keyframes nudge {
                 0%,
@@ -658,7 +681,7 @@
                     transform: rotate(0);
                 }
                 50% {
-                    transform: rotate(-12deg) scale(1.15);
+                    transform: rotate(-12deg) scale(1.12);
                 }
             }
             .q .answer {
@@ -669,14 +692,25 @@
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
+                padding: 0 14px;
                 font-weight: 800;
-                font-size: 26px;
+                font-size: 25px;
                 color: #fff;
-                pointer-events: none;
+                cursor: pointer;
             }
-            .q.showing .answer {
+            .q.revealed .answer {
                 display: flex;
                 animation: pop 0.25s cubic-bezier(0.3, 1.8, 0.5, 1);
+            }
+            .q .next-pill {
+                margin-left: auto;
+                font-size: 14px;
+                font-weight: 800;
+                padding: 4px 10px;
+                border-radius: 999px;
+                background: rgba(0, 0, 0, 0.22);
+                color: inherit;
+                text-shadow: none;
             }
             .answer.yes {
                 background: var(--go);
@@ -690,9 +724,12 @@
                 background: var(--paper);
                 color: var(--paper-ink);
             }
+            .answer.info .next-pill {
+                background: color-mix(in srgb, var(--ink) 12%, transparent);
+            }
             .swatch {
-                width: 34px;
-                height: 34px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 border: 3px solid var(--ink);
                 flex: none;
@@ -876,6 +913,32 @@
                 }
             }
 
+            /* ---------- iPad / Tablet Landscape Layout ---------- */
+            @media (orientation: landscape) and (min-width: 700px) {
+                .app {
+                    max-width: 1040px;
+                    padding: 12px 24px 18px;
+                }
+                .prompt {
+                    min-height: 54px;
+                }
+                body[data-phase="ask"] .play-area {
+                    flex-direction: row;
+                    align-items: stretch;
+                    gap: 24px;
+                }
+                body[data-phase="ask"] .stage {
+                    flex: 0 0 42%;
+                    min-height: 0;
+                }
+                body[data-phase="ask"] .panel {
+                    flex: 1 1 auto;
+                    max-height: none;
+                    padding-top: 0;
+                    justify-content: center;
+                }
+            }
+
             @media (max-height: 660px) {
                 .stage {
                     min-height: 120px;
@@ -890,11 +953,11 @@
                     min-height: 46px;
                     border-radius: 15px;
                 }
-                .q-main {
+                .q-btn {
                     font-size: 18px;
                 }
                 .answer {
-                    font-size: 22px;
+                    font-size: 21px;
                 }
                 .q .ic {
                     width: 36px;
@@ -924,12 +987,17 @@
     <body data-phase="hide">
         <div class="app">
             <header class="bar">
-                <div class="logo" aria-label="Bag">
+                <button
+                    class="logo"
+                    id="logoBtn"
+                    type="button"
+                    aria-label="Back to main screen"
+                >
                     <svg viewBox="0 40 200 180" aria-hidden="true">
                         <use href="#sackShape" />
                     </svg>
                     Bag
-                </div>
+                </button>
                 <button
                     class="round-btn"
                     id="libraryBtn"
@@ -965,45 +1033,99 @@
                 </div>
             </div>
 
-            <main class="stage" id="stage">
-                <button
-                    class="bag open hungry"
-                    id="bag"
-                    aria-label="The bag. Tap to tickle or drag something inside."
-                >
-                    <!-- back layer: the inside of the mouth -->
-                    <svg viewBox="0 0 200 220" aria-hidden="true">
-                        <g class="open-only">
-                            <ellipse
-                                cx="100"
-                                cy="78"
-                                rx="62"
-                                ry="18"
-                                fill="var(--mouth)"
+            <div class="play-area">
+                <main class="stage" id="stage">
+                    <button
+                        class="bag open hungry"
+                        id="bag"
+                        aria-label="The bag. Tap to tickle or drag something inside."
+                    >
+                        <!-- back layer: the inside of the mouth -->
+                        <svg viewBox="0 0 200 220" aria-hidden="true">
+                            <g class="open-only">
+                                <ellipse
+                                    cx="100"
+                                    cy="78"
+                                    rx="62"
+                                    ry="18"
+                                    fill="var(--mouth)"
+                                />
+                                <path
+                                    d="M38,78 A62,18 0 0 1 162,78"
+                                    fill="none"
+                                    stroke="var(--sack-dark)"
+                                    stroke-width="7"
+                                    stroke-linecap="round"
+                                />
+                            </g>
+                        </svg>
+                        <div class="inside">
+                            <div class="thing" id="bagThing"></div>
+                        </div>
+                        <!-- front layer: body, face, tie -->
+                        <svg viewBox="0 0 200 220" aria-hidden="true">
+                            <defs>
+                                <g id="sackShape">
+                                    <path
+                                        d="M64,90 C36,100 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 164,100 136,90 Z"
+                                        fill="var(--sack)"
+                                        stroke="var(--ink)"
+                                        stroke-width="5"
+                                        stroke-linejoin="round"
+                                    />
+                                    <path
+                                        d="M60,92 C50,72 42,50 58,36 C68,46 80,30 90,40 C96,28 104,28 110,40 C120,30 132,46 142,36 C158,50 150,72 140,92 Z"
+                                        fill="var(--sack)"
+                                        stroke="var(--ink)"
+                                        stroke-width="5"
+                                        stroke-linejoin="round"
+                                    />
+                                    <rect
+                                        x="54"
+                                        y="80"
+                                        width="92"
+                                        height="15"
+                                        rx="7.5"
+                                        fill="var(--ribbon)"
+                                        stroke="var(--ink)"
+                                        stroke-width="4"
+                                    />
+                                </g>
+                            </defs>
+                            <path
+                                class="open-only"
+                                d="M38,78 C30,105 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 170,105 162,78 A62,18 0 0 1 38,78 Z"
+                                fill="var(--sack)"
+                                stroke="var(--ink)"
+                                stroke-width="5"
+                                stroke-linejoin="round"
                             />
                             <path
-                                d="M38,78 A62,18 0 0 1 162,78"
+                                class="closed-only"
+                                d="M64,90 C36,100 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 164,100 136,90 Z"
+                                fill="var(--sack)"
+                                stroke="var(--ink)"
+                                stroke-width="5"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M40,188 C70,204 130,204 160,188"
                                 fill="none"
                                 stroke="var(--sack-dark)"
-                                stroke-width="7"
+                                stroke-width="3"
+                                stroke-dasharray="7 7"
                                 stroke-linecap="round"
                             />
-                        </g>
-                    </svg>
-                    <div class="inside">
-                        <div class="thing" id="bagThing"></div>
-                    </div>
-                    <!-- front layer: body, face, tie -->
-                    <svg viewBox="0 0 200 220" aria-hidden="true">
-                        <defs>
-                            <g id="sackShape">
+                            <g class="open-only">
                                 <path
-                                    d="M64,90 C36,100 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 164,100 136,90 Z"
-                                    fill="var(--sack)"
+                                    d="M38,78 A62,18 0 0 0 162,78"
+                                    fill="none"
                                     stroke="var(--ink)"
                                     stroke-width="5"
-                                    stroke-linejoin="round"
+                                    stroke-linecap="round"
                                 />
+                            </g>
+                            <g class="closed-only">
                                 <path
                                     d="M60,92 C50,72 42,50 58,36 C68,46 80,30 90,40 C96,28 104,28 110,40 C120,30 132,46 142,36 C158,50 150,72 140,92 Z"
                                     fill="var(--sack)"
@@ -1021,173 +1143,136 @@
                                     stroke="var(--ink)"
                                     stroke-width="4"
                                 />
-                            </g>
-                        </defs>
-                        <path
-                            class="open-only"
-                            d="M38,78 C30,105 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 170,105 162,78 A62,18 0 0 1 38,78 Z"
-                            fill="var(--sack)"
-                            stroke="var(--ink)"
-                            stroke-width="5"
-                            stroke-linejoin="round"
-                        />
-                        <path
-                            class="closed-only"
-                            d="M64,90 C36,100 12,150 22,182 C32,212 70,216 100,216 C130,216 168,212 178,182 C188,150 164,100 136,90 Z"
-                            fill="var(--sack)"
-                            stroke="var(--ink)"
-                            stroke-width="5"
-                            stroke-linejoin="round"
-                        />
-                        <path
-                            d="M40,188 C70,204 130,204 160,188"
-                            fill="none"
-                            stroke="var(--sack-dark)"
-                            stroke-width="3"
-                            stroke-dasharray="7 7"
-                            stroke-linecap="round"
-                        />
-                        <g class="open-only">
-                            <path
-                                d="M38,78 A62,18 0 0 0 162,78"
-                                fill="none"
-                                stroke="var(--ink)"
-                                stroke-width="5"
-                                stroke-linecap="round"
-                            />
-                        </g>
-                        <g class="closed-only">
-                            <path
-                                d="M60,92 C50,72 42,50 58,36 C68,46 80,30 90,40 C96,28 104,28 110,40 C120,30 132,46 142,36 C158,50 150,72 140,92 Z"
-                                fill="var(--sack)"
-                                stroke="var(--ink)"
-                                stroke-width="5"
-                                stroke-linejoin="round"
-                            />
-                            <rect
-                                x="54"
-                                y="80"
-                                width="92"
-                                height="15"
-                                rx="7.5"
-                                fill="var(--ribbon)"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                            <ellipse
-                                cx="84"
-                                cy="87"
-                                rx="15"
-                                ry="10"
-                                fill="var(--ribbon)"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                            <ellipse
-                                cx="116"
-                                cy="87"
-                                rx="15"
-                                ry="10"
-                                fill="var(--ribbon)"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                            <circle
-                                cx="100"
-                                cy="87"
-                                r="7"
-                                fill="var(--ribbon)"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                        </g>
-                        <!-- face -->
-                        <g>
-                            <circle
-                                cx="76"
-                                cy="140"
-                                r="15"
-                                fill="#fff"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                            <circle
-                                cx="124"
-                                cy="140"
-                                r="15"
-                                fill="#fff"
-                                stroke="var(--ink)"
-                                stroke-width="4"
-                            />
-                            <g class="pupils" id="pupils">
-                                <circle cx="76" cy="140" r="7" fill="#3B2A5C" />
-                                <circle
-                                    cx="124"
-                                    cy="140"
-                                    r="7"
-                                    fill="#3B2A5C"
+                                <ellipse
+                                    cx="84"
+                                    cy="87"
+                                    rx="15"
+                                    ry="10"
+                                    fill="var(--ribbon)"
+                                    stroke="var(--ink)"
+                                    stroke-width="4"
                                 />
-                                <circle cx="79" cy="137" r="2.4" fill="#fff" />
-                                <circle cx="127" cy="137" r="2.4" fill="#fff" />
+                                <ellipse
+                                    cx="116"
+                                    cy="87"
+                                    rx="15"
+                                    ry="10"
+                                    fill="var(--ribbon)"
+                                    stroke="var(--ink)"
+                                    stroke-width="4"
+                                />
+                                <circle
+                                    cx="100"
+                                    cy="87"
+                                    r="7"
+                                    fill="var(--ribbon)"
+                                    stroke="var(--ink)"
+                                    stroke-width="4"
+                                />
                             </g>
-                            <g class="lids">
+                            <!-- face -->
+                            <g>
                                 <circle
                                     cx="76"
                                     cy="140"
-                                    r="15.5"
-                                    fill="var(--sack)"
+                                    r="15"
+                                    fill="#fff"
                                     stroke="var(--ink)"
                                     stroke-width="4"
                                 />
                                 <circle
                                     cx="124"
                                     cy="140"
-                                    r="15.5"
-                                    fill="var(--sack)"
+                                    r="15"
+                                    fill="#fff"
                                     stroke="var(--ink)"
                                     stroke-width="4"
                                 />
+                                <g class="pupils" id="pupils">
+                                    <circle
+                                        cx="76"
+                                        cy="140"
+                                        r="7"
+                                        fill="#3B2A5C"
+                                    />
+                                    <circle
+                                        cx="124"
+                                        cy="140"
+                                        r="7"
+                                        fill="#3B2A5C"
+                                    />
+                                    <circle
+                                        cx="79"
+                                        cy="137"
+                                        r="2.4"
+                                        fill="#fff"
+                                    />
+                                    <circle
+                                        cx="127"
+                                        cy="137"
+                                        r="2.4"
+                                        fill="#fff"
+                                    />
+                                </g>
+                                <g class="lids">
+                                    <circle
+                                        cx="76"
+                                        cy="140"
+                                        r="15.5"
+                                        fill="var(--sack)"
+                                        stroke="var(--ink)"
+                                        stroke-width="4"
+                                    />
+                                    <circle
+                                        cx="124"
+                                        cy="140"
+                                        r="15.5"
+                                        fill="var(--sack)"
+                                        stroke="var(--ink)"
+                                        stroke-width="4"
+                                    />
+                                </g>
+                                <ellipse
+                                    cx="58"
+                                    cy="166"
+                                    rx="9"
+                                    ry="5.5"
+                                    fill="#FF8C7A"
+                                    opacity=".75"
+                                />
+                                <ellipse
+                                    cx="142"
+                                    cy="166"
+                                    rx="9"
+                                    ry="5.5"
+                                    fill="#FF8C7A"
+                                    opacity=".75"
+                                />
+                                <path
+                                    id="smile"
+                                    d="M86,166 Q100,182 114,166"
+                                    fill="none"
+                                    stroke="var(--ink)"
+                                    stroke-width="5"
+                                    stroke-linecap="round"
+                                />
                             </g>
-                            <ellipse
-                                cx="58"
-                                cy="166"
-                                rx="9"
-                                ry="5.5"
-                                fill="#FF8C7A"
-                                opacity=".75"
-                            />
-                            <ellipse
-                                cx="142"
-                                cy="166"
-                                rx="9"
-                                ry="5.5"
-                                fill="#FF8C7A"
-                                opacity=".75"
-                            />
-                            <path
-                                id="smile"
-                                d="M86,166 Q100,182 114,166"
-                                fill="none"
-                                stroke="var(--ink)"
-                                stroke-width="5"
-                                stroke-linecap="round"
-                            />
-                        </g>
-                    </svg>
-                </button>
-            </main>
+                        </svg>
+                    </button>
+                </main>
 
-            <section class="panel" aria-label="Questions">
-                <div class="stars" id="stars" aria-live="polite"></div>
-                <div class="questions" id="questions"></div>
-                <button
-                    class="guessed"
-                    id="guessedBtn"
-                    aria-label="Hold for 1 second to guess"
-                >
-                    <span>Hold to guess! 🎉</span>
-                </button>
-            </section>
+                <section class="panel" aria-label="Questions">
+                    <div class="stars" id="stars" aria-live="polite"></div>
+                    <div class="questions" id="questions"></div>
+                    <button
+                        class="guessed"
+                        id="guessedBtn"
+                        aria-label="Hold for 1 second to guess"
+                    >
+                        <span>Hold to guess! 🎉</span>
+                    </button>
+                </section>
+            </div>
         </div>
 
         <div
@@ -1297,7 +1382,7 @@
             /* =========================================================
    LIBRARY — 100 things. Format: "emoji|name|colors|sound|tags"
    colors: comma list; sound: "-" if it is quiet; tags answer the
-   yes/no questions below. Add or edit freely.
+   yes/no questions below. Audited to match Twemoji 14.0.2 colors.
    ========================================================= */
             const FRIDGE_SVG =
                 '<svg viewBox="0 0 64 64"><rect x="14" y="3" width="36" height="58" rx="7" fill="#EAF3FA" stroke="#3B2A5C" stroke-width="3.5"/><line x1="14" y1="23" x2="50" y2="23" stroke="#3B2A5C" stroke-width="3.5"/><rect x="19" y="9" width="4" height="9" rx="2" fill="#3B2A5C"/><rect x="19" y="28" width="4" height="15" rx="2" fill="#3B2A5C"/><rect x="33" y="30" width="10" height="8" rx="1.5" fill="#FFD166" transform="rotate(8 38 34)"/><circle cx="40" cy="47" r="3.5" fill="#FF5A4E"/><rect x="18" y="60" width="6" height="3" fill="#3B2A5C"/><rect x="40" y="60" width="6" height="3" fill="#3B2A5C"/></svg>';
@@ -1307,11 +1392,11 @@
                 "✈️|plane|white|Zoom!|fly big heavy noise ride outside",
                 "🚌|bus|yellow|Beep beep!|wheels big heavy noise ride outside",
                 "🚲|bicycle|red|Ring ring!|wheels ride outside play noise",
-                "⛵|boat|white|-|water big heavy ride outside",
+                "⛵|boat|white,red|-|water big heavy ride outside",
                 "🚀|rocket|red,white|Whoosh!|fly big heavy noise ride outside",
                 "🚂|train|black,red|Choo choo!|wheels big heavy noise ride outside",
                 "🚜|tractor|green|Brrrm brrrm!|wheels big heavy noise ride outside",
-                "🚁|helicopter|blue|Whirr whirr!|fly big heavy noise ride outside",
+                "🚁|helicopter|red|Whirr whirr!|fly big heavy noise ride outside",
                 "🚒|fire engine|red|Nee naw!|wheels big heavy noise ride outside",
                 "🧀|cheese|yellow|-|eat small kitchen home cold",
                 "🍎|apple|red|-|eat sweet fruit round grow small kitchen home",
@@ -1326,7 +1411,7 @@
                 "🍪|cookie|brown|-|eat sweet round small kitchen home",
                 "🥛|milk|white|-|eat cold kitchen home",
                 "🐕|dog|brown|Woof woof!|alive legs tail noise soft play grow home",
-                "🐈|cat|orange|Meow!|alive legs tail noise soft play grow home",
+                "🐈|cat|yellow,orange|Meow!|alive legs tail noise soft play grow home",
                 "🐟|fish|blue|-|alive water tail small grow",
                 "🐦|bird|blue|Tweet tweet!|alive fly feathers legs tail noise small outside grow",
                 "🦋|butterfly|orange,black|-|alive fly legs small outside grow",
@@ -1335,20 +1420,20 @@
                 "🦆|duck|brown,green|Quack quack!|alive fly water feathers legs tail noise outside grow",
                 "🐌|snail|brown|-|alive small outside grow",
                 "🐝|bee|yellow,black|Buzz buzz!|alive fly legs noise small outside grow",
-                "🦁|lion|orange|Roar!|alive big heavy legs tail noise outside grow",
+                "🦁|lion|orange,yellow|Roar!|alive big heavy legs tail noise outside grow",
                 "⚽|ball|black,white|-|round play outside home",
                 "🧸|teddy bear|brown|-|soft play legs home",
-                "📖|book|white|-|home",
+                "📖|book|white,blue|-|home",
                 "☂️|umbrella|purple|-|outside home",
-                "👟|shoe|blue|-|wear small home",
+                "👟|shoe|blue,white|-|wear small home",
                 "🧢|cap|blue|-|wear soft small home",
                 "🔑|key|yellow|-|small home",
-                "📱|phone|black|Ring ring!|power noise small play home",
-                "⏰|clock|red|Tick tock!|power noise round small home",
+                "📱|phone|black,blue|Ring ring!|power noise small play home",
+                "⏰|clock|red,white|Tick tock!|power noise round small home",
                 "🪥|toothbrush|blue,white|-|small water home",
                 "🥄|spoon|grey|-|small kitchen home",
                 "🎈|balloon|red|-|fly round play soft",
-                "🎸|guitar|red|Strum strum!|noise play home",
+                "🎸|guitar|red,white|Strum strum!|noise play home",
                 "🖍️|crayon|red|-|small play home",
                 "🧦|sock|red,white|-|wear soft small home",
                 "💡|light bulb|yellow|-|power small home",
@@ -1366,19 +1451,19 @@
                 "🦉|owl|brown|Hoo hoo!|alive fly feathers legs tail noise outside grow",
                 "🐍|snake|green|Hiss!|alive tail noise outside grow",
                 "🐭|mouse|grey|Squeak squeak!|alive legs tail noise soft small home grow",
-                "🐢|turtle|green,brown|-|alive water legs tail small outside grow",
+                "🐢|turtle|green|-|alive water legs tail small outside grow",
                 "🐧|penguin|black,white|Honk!|alive water feathers legs tail noise cold outside grow",
-                "🐬|dolphin|blue,grey|Click click!|alive water tail noise big heavy outside grow",
+                "🐬|dolphin|blue|Click click!|alive water tail noise big heavy outside grow",
                 "🚓|police car|white,blue|Wee woo wee woo!|wheels big heavy noise ride outside",
                 "🚑|ambulance|white,red|Wee woo!|wheels big heavy noise ride outside",
                 "🏍️|motorcycle|black,red|Vroom vroom!|wheels big heavy noise ride outside",
                 "🚚|dump truck|yellow|Honk honk!|wheels big heavy noise ride outside",
-                "🛴|scooter|blue|-|wheels ride play outside home",
-                "🛝|slide|yellow,blue|-|big heavy ride play outside",
-                "🛹|skateboard|black,red|-|wheels ride play outside home",
-                "🚢|ship|white,blue|Toot toot!|water big heavy noise ride outside",
+                "🛴|scooter|red|-|wheels ride play outside home",
+                "🛝|slide|blue,red|-|big heavy ride play outside",
+                "🛹|skateboard|green,red|-|wheels ride play outside home",
+                "🚢|ship|white,black,red|Toot toot!|water big heavy noise ride outside",
                 "🥞|pancake|yellow,brown|-|eat sweet round soft small kitchen home",
-                "🧁|cupcake|pink,white|-|eat sweet round small kitchen home",
+                "🧁|cupcake|pink,blue|-|eat sweet round small kitchen home",
                 "🍩|donut|pink,brown|-|eat sweet round small kitchen home",
                 "🍇|grapes|purple|-|eat sweet fruit round small grow kitchen home",
                 "🍊|orange|orange|-|eat sweet fruit round grow small kitchen home",
@@ -1396,13 +1481,13 @@
                 "🧩|puzzle|blue,red|-|play small home",
                 "🪀|yo-yo|red|-|round play small home",
                 "🛁|bathtub|white|-|water big heavy home",
-                "🛏️|bed|blue,white|-|big heavy soft home",
+                "🛏️|bed|blue,white,brown|-|big heavy soft home",
                 "🪑|chair|brown|-|legs home",
                 "🧼|soap|pink|-|water small home",
-                "☕|cup|blue,white|-|small kitchen home",
+                "☕|cup|white,brown|-|small kitchen home",
                 "🍴|fork|grey|-|small kitchen home",
                 "🪴|plant|green,brown|-|grow home outside",
-                "🪟|window|blue,white|-|home outside",
+                "🪟|window|blue,brown|-|home outside",
             ];
             const SOME = new Set([
                 "cheese",
@@ -1431,8 +1516,20 @@
                     tags: new Set(tags.split(" ")),
                 };
             });
-            const render = (item) =>
-                item.look === "svg:fridge" ? FRIDGE_SVG : item.look;
+
+            function emojiToCodepoint(emoji) {
+                return Array.from(emoji)
+                    .map((c) => c.codePointAt(0).toString(16))
+                    .filter((hex) => hex !== "fe0f")
+                    .join("-");
+            }
+
+            /* Renders consistent Twemoji SVGs across iOS/Android/Windows, falling back to native emoji if offline without cache */
+            const render = (item) => {
+                if (item.look === "svg:fridge") return FRIDGE_SVG;
+                const hex = emojiToCodepoint(item.look);
+                return `<img src="./emoji/${hex}.svg" alt="${item.name}" draggable="false" onerror="this.replaceWith(document.createTextNode('${item.look}'))">`;
+            };
 
             /* =========================================================
    QUESTIONS — "color" and "sound" have open answers; every other key
@@ -1586,7 +1683,7 @@
                 pink: "#FF8CC6",
             };
 
-            /* What the hider sees when they hold "Answer". */
+            /* What the hider sees when they tap to reveal the answer. */
             function answerFor(q, item) {
                 if (q.key === "color") {
                     const words = item.colors
@@ -1600,17 +1697,17 @@
                                     (c) =>
                                         `<span class="swatch" style="background:${COLORS[c] || "#ccc"}"></span>`,
                                 )
-                                .join("") + words,
+                                .join("") + `<span>${words}</span>`,
                     };
                 }
                 if (q.key === "sound") {
                     return item.sound
-                        ? { cls: "info", html: `🔊 ${item.sound}` }
-                        : { cls: "info", html: "🤫 It’s quiet" };
+                        ? { cls: "info", html: `<span>🔊 ${item.sound}</span>` }
+                        : { cls: "info", html: "<span>🤫 It’s quiet</span>" };
                 }
                 return item.tags.has(q.key)
-                    ? { cls: "yes", html: "👍 Yes!" }
-                    : { cls: "no", html: "👎 No" };
+                    ? { cls: "yes", html: "<span>👍 Yes!</span>" }
+                    : { cls: "no", html: "<span>👎 No</span>" };
             }
 
             /* Prunes redundant follow-up questions once a broader question is asked. */
@@ -1728,11 +1825,11 @@
                     .replace(/^-|-$/g, "");
             }
 
-            function speakFallback(lines, excited = false) {
+            function speakFallback(lines, excited = false, rate = 1.0) {
                 if (!("speechSynthesis" in window)) return;
                 speechSynthesis.cancel();
                 const u = new SpeechSynthesisUtterance(lines.join(" "));
-                u.rate = excited ? 1.05 : 1.0;
+                u.rate = rate * (excited ? 1.05 : 1.0);
                 u.pitch = 1.0;
                 speechSynthesis.speak(u);
             }
@@ -1750,7 +1847,7 @@
                 if ("speechSynthesis" in window) speechSynthesis.cancel();
             }
 
-            function say(input, excited = false) {
+            function say(input, excited = false, rate = 1.0) {
                 if (!soundOn) return;
                 const lines = (Array.isArray(input) ? input : [input])
                     .map((t) =>
@@ -1771,13 +1868,18 @@
                     const audio = new Audio(
                         `./audio/${audioKey(lines[idx])}.mp3`,
                     );
+                    audio.playbackRate = rate;
                     activeVoiceAudio = audio;
-                    audio.addEventListener("ended", () => playAt(idx + 1), {
-                        once: true,
-                    });
+                    audio.addEventListener(
+                        "ended",
+                        () => {
+                            setTimeout(() => playAt(idx + 1), 240);
+                        },
+                        { once: true },
+                    );
                     audio.play().catch(() => {
                         if (seq === voiceSeq)
-                            speakFallback(lines.slice(idx), excited);
+                            speakFallback(lines.slice(idx), excited, rate);
                     });
                 };
 
@@ -1817,6 +1919,7 @@
                         ? "The bag. Press and hold to peek inside."
                         : "The bag. Tap to tickle or drag something inside.",
                 );
+                requestAnimationFrame(layout);
             }
             function setPrompt(big, small) {
                 promptBig.textContent = big;
@@ -1827,13 +1930,14 @@
             function layout() {
                 const w = stage.clientWidth,
                     h = stage.clientHeight;
+                if (!w || !h) return;
                 const m = Math.min(w, h);
-                const item = Math.round(Math.max(58, Math.min(84, m * 0.2)));
+                const item = Math.round(Math.max(58, Math.min(92, m * 0.2)));
                 stage.style.setProperty("--item", item + "px");
                 const bagW =
                     phase === "hide"
-                        ? Math.min(w * 0.4, h * 0.36)
-                        : Math.min(w * 0.55, h * 0.78, 230);
+                        ? Math.min(w * 0.4, h * 0.36, 220)
+                        : Math.min(w * 0.62, h * 0.78, 250);
                 bag.style.setProperty("--bag-w", Math.max(90, bagW) + "px");
                 document.documentElement.style.setProperty(
                     "--bag-w",
@@ -1858,6 +1962,13 @@
                 });
             }
             new ResizeObserver(layout).observe(stage);
+            window.addEventListener("orientationchange", () => {
+                setTimeout(layout, 80);
+                setTimeout(layout, 300);
+            });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener("resize", layout);
+            }
 
             /* ===================== library picker ===================== */
             function matchesCategory(item, cat) {
@@ -2014,6 +2125,7 @@
             }
 
             function newRound() {
+                stopVoice();
                 cancelGuessHold();
                 closeLibrary();
                 tickleTimes = [];
@@ -2085,13 +2197,21 @@
                     setPrompt(
                         "What’s in the bag? 🤔",
                         helperOn
-                            ? "Tap a question to ask it, then hold Answer"
+                            ? "Tap a question, then tap again to peek answer"
                             : "Tap a question to ask it",
                     );
                     queue = questionQueue(item);
                     for (let i = 0; i < VISIBLE_QUESTIONS; i++) addQuestion();
                     layout();
-                    say("It's in the bag! Open your eyes. What's in the bag?");
+                    say(
+                        [
+                            "It's in the bag!",
+                            "Open your eyes.",
+                            "What's in the bag?",
+                        ],
+                        false,
+                        1.3,
+                    );
                 }, 520);
             }
 
@@ -2111,12 +2231,15 @@
                 card.className = "q new";
                 const a = answerFor(q, hidden);
                 card.innerHTML = `
-    <button class="q-main"><span class="ic" aria-hidden="true">${q.ic}</span><span>${q.text}</span></button>
-    <button class="ans" aria-label="Hold to see the answer"><span>🤫</span>Answer</button>
-    <div class="answer ${a.cls}" aria-live="polite">${a.html}</div>`;
-                const main = card.querySelector(".q-main"),
-                    ans = card.querySelector(".ans");
-                let seen = false;
+    <button class="q-btn" type="button"><span class="ic" aria-hidden="true">${q.ic}</span><span class="q-label">${q.text}</span></button>
+    <button class="repeat-btn" type="button" aria-label="Repeat question">🔊</button>
+    <div class="answer ${a.cls}" role="button" tabindex="0" aria-live="polite" aria-label="Answer shown. Tap for next question.">${a.html}<span class="next-pill">Next ➔</span></div>`;
+
+                const btn = card.querySelector(".q-btn"),
+                    icEl = card.querySelector(".ic"),
+                    labelEl = card.querySelector(".q-label"),
+                    repeatBtn = card.querySelector(".repeat-btn"),
+                    ansOverlay = card.querySelector(".answer");
 
                 const replace = () => {
                     if (card.classList.contains("gone")) return;
@@ -2124,50 +2247,52 @@
                     setTimeout(() => {
                         addQuestion(card);
                         card.remove();
-                    }, 400);
+                    }, 360);
                 };
                 card._replace = replace;
 
-                main.addEventListener("click", () => {
+                repeatBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
                     say(q.text);
-                    if (card.classList.contains("asked")) return; // tapping again just repeats it
-                    blip("pop");
-                    asked++;
-                    pruneQueue(q, hidden);
-                    const s = document.createElement("span");
-                    s.textContent = "⭐";
-                    starsEl.appendChild(s);
-                    card.classList.add("asked");
-                    if (!helperOn) setTimeout(replace, 450);
                 });
 
-                // press and hold to see the answer, let go to move on
-                const show = (on) => {
-                    if (!helperOn || !card.classList.contains("asked")) return;
-                    card.classList.toggle("showing", on);
-                    if (on) seen = true;
-                    else if (seen) setTimeout(replace, 250);
-                };
-                ans.addEventListener("pointerdown", (e) => {
-                    e.preventDefault();
-                    show(true);
-                    try {
-                        ans.setPointerCapture(e.pointerId);
-                    } catch (_) {}
-                });
-                ["pointerup", "pointercancel"].forEach((ev) =>
-                    ans.addEventListener(ev, () => show(false)),
-                );
-                ans.addEventListener("keydown", (e) => {
-                    if ((e.key === " " || e.key === "Enter") && !e.repeat) {
-                        e.preventDefault();
-                        show(true);
+                btn.addEventListener("click", () => {
+                    // Step 1: Unasked -> Ask question aloud & flip card to Hider Peek prompt
+                    if (!card.classList.contains("asked")) {
+                        say(q.text);
+                        blip("pop");
+                        asked++;
+                        pruneQueue(q, hidden);
+                        const s = document.createElement("span");
+                        s.textContent = "⭐";
+                        starsEl.appendChild(s);
+                        card.classList.add("asked");
+                        if (helperOn) {
+                            icEl.textContent = "🤫";
+                            labelEl.textContent = "Tap to peek answer";
+                        } else {
+                            setTimeout(replace, 450);
+                        }
+                        return;
+                    }
+                    // Step 2: Asked -> Reveal full-card answer for Hider
+                    if (helperOn && !card.classList.contains("revealed")) {
+                        blip("pop");
+                        card.classList.add("revealed");
                     }
                 });
-                ans.addEventListener("keyup", (e) => {
-                    if (e.key === " " || e.key === "Enter") show(false);
+
+                // Step 3: Revealed -> Tap anywhere on the answer banner to dismiss & load next question
+                ansOverlay.addEventListener("click", () => {
+                    blip("pop");
+                    replace();
                 });
-                ans.addEventListener("contextmenu", (e) => e.preventDefault());
+                ansOverlay.addEventListener("keydown", (e) => {
+                    if (e.key === " " || e.key === "Enter") {
+                        e.preventDefault();
+                        replace();
+                    }
+                });
 
                 questionsEl.insertBefore(card, beforeEl || null);
             }
@@ -2178,7 +2303,7 @@
                 setPhase("reveal");
                 bag.classList.add("open", "peeking");
                 $("revealThing").innerHTML = render(hidden);
-                $("revealTitle").textContent = `It was ${hidden.phrase}!`;
+                $("revealTitle").textContent = `It's ${hidden.phrase}!`;
                 $("revealNote").textContent =
                     asked === 0
                         ? "Wow, no questions at all!"
@@ -2462,6 +2587,10 @@
             });
 
             /* ===================== buttons ===================== */
+            $("logoBtn").addEventListener("click", () => {
+                blip("pop");
+                newRound();
+            });
             $("againBtn").addEventListener("click", newRound);
             $("restartBtn").addEventListener("click", newRound);
             function paintSound() {
@@ -2501,7 +2630,7 @@
                     setPrompt(
                         "What’s in the bag? 🤔",
                         helperOn
-                            ? "Tap a question to ask it, then hold Answer"
+                            ? "Tap a question, then tap again to peek answer"
                             : "Tap a question to ask it",
                     );
                     // with the helper off, asked questions move on straight away without showing answers

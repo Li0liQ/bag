@@ -1,5 +1,5 @@
 // Bump VERSION whenever you change a file, so phones pick up the update.
-const VERSION = "bag-v4";
+const VERSION = "bag-v5";
 const SHELL = [
   "./",
   "./index.html",
@@ -14,13 +14,15 @@ self.addEventListener("install", (e) => {
     (async () => {
       const cache = await caches.open(VERSION);
       await cache.addAll(SHELL);
-      try {
-        const res = await fetch("./audio/manifest.json");
-        if (res.ok) {
-          const audioFiles = await res.json();
-          await cache.addAll(audioFiles);
-        }
-      } catch (_) {}
+      for (const manifestUrl of ["./audio/manifest.json", "./emoji/manifest.json"]) {
+        try {
+          const res = await fetch(manifestUrl);
+          if (res.ok) {
+            const files = await res.json();
+            await cache.addAll(files);
+          }
+        } catch (_) {}
+      }
       self.skipWaiting();
     })(),
   );
@@ -39,7 +41,7 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Cache-first, then network (also stores the Google Font and any audio clips so the game works offline).
+// Cache-first, then network (also stores the Google Font, emoji SVGs, and audio clips so the game works offline).
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
