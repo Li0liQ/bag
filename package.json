@@ -1,5 +1,6 @@
 {
   "name": "bag",
+  "private": true,
   "version": "1.0.0",
   "description": "Bag – a guessing game for little ones",
   "keywords": [
@@ -18,13 +19,13 @@
   },
   "license": "ISC",
   "author": "Li0liQ",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.html",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx --yes serve -l 8080",
     "assets": "node generate-assets.mjs",
     "build": "npm run assets"
   },
