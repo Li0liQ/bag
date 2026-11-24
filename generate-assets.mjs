@@ -2,28 +2,21 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { KokoroTTS } from "kokoro-js";
 import { Mp3Encoder } from "@breezystack/lamejs";
+import {
+    LIBRARY,
+    SOME,
+    QUESTIONS,
+    CHEERS,
+    GIGGLES,
+    audioKey,
+    emojiToCodepoint,
+} from "./data.js";
 
-// "af_sky" is Kokoro's brightest, most energetic voice for kids.
-// Other great options: "af_bella" (warm & bubbly), "bf_alice" (bright UK)
 const VOICE = "af_sky";
 const AUDIO_DIR = "./audio";
 const EMOJI_DIR = "./emoji";
 const TWEMOJI_BASE =
     "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
-
-export function audioKey(text) {
-    return text
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}]+/gu, "-")
-        .replace(/^-|-$/g, "");
-}
-
-function emojiToCodepoint(emoji) {
-    return Array.from(emoji)
-        .map((c) => c.codePointAt(0).toString(16))
-        .filter((h) => h !== "fe0f")
-        .join("-");
-}
 
 function cleanText(text) {
     return text
@@ -32,24 +25,11 @@ function cleanText(text) {
         .trim();
 }
 
-// Shapes the spoken text for warmer, bouncier toddler prosody without changing the filename key
 function makeCheerful(text, kind) {
-    if (kind === "cheer") {
-        return text.replace(/!/g, "!! ");
-    }
-    if (kind === "giggle") {
-        return text
-            .replace("Tee-hee!", "Tee-hee-hee!")
-            .replace("Hehe,", "He-he-he!");
-    }
-    if (kind === "reveal") {
-        // Turns "It's a toy car!" into "It's a toy car!!" for an upbeat lift
-        return text.replace(/!$/, "!!");
-    }
-    if (kind === "question") {
-        // Adds a subtle upward inflection on yes/no and open questions
-        return text.replace(/\?$/, "?!");
-    }
+    if (kind === "cheer") return text.replace(/!/g, "!! ");
+    if (kind === "giggle") return text.replace("Hehe,", "He-he-he!");
+    if (kind === "reveal") return text.replace(/!$/, "!!");
+    if (kind === "question") return text.replace(/\?$/, "?!");
     return text;
 }
 
@@ -78,7 +58,7 @@ function encodeMp3(float32Samples, sampleRate) {
     return Buffer.concat(chunks);
 }
 
-async function syncEmojis(LIBRARY) {
+async function syncEmojis() {
     await fs.mkdir(EMOJI_DIR, { recursive: true });
     const emojiFiles = [];
     let downloaded = 0;
@@ -99,7 +79,9 @@ async function syncEmojis(LIBRARY) {
 
         const res = await fetch(`${TWEMOJI_BASE}/${filename}`);
         if (!res.ok) {
-            throw new Error(`Failed to fetch ${look} (${filename}): ${res.status}`);
+            throw new Error(
+                `Failed to fetch ${look} (${filename}): ${res.status}`,
+            );
         }
         await fs.writeFile(outPath, await res.text());
         downloaded++;
@@ -114,14 +96,11 @@ async function syncEmojis(LIBRARY) {
     );
 }
 
-async function syncAudio(LIBRARY, SOME, QUESTIONS, CHEERS, GIGGLES) {
-    const someSet = new Set(SOME);
-
-    // Map of raw UI string -> { kind, speed }
+async function syncAudio() {
     const entries = new Map([
-        ["It's in the bag!", { kind: "prompt", speed: 1.05 }],
-        ["Open your eyes.", { kind: "prompt", speed: 0.85 }],
-        ["What's in the bag?", { kind: "question", speed: 1.02 }],
+        ["It's in the bag!", { kind: "prompt", speed: 1.08 }],
+        ["Open your eyes.", { kind: "prompt", speed: 0.98 }],
+        ["What's in the bag?", { kind: "question", speed: 1.06 }],
         ["Bleh! Nothing in here!", { kind: "giggle", speed: 1.15 }],
     ]);
 
@@ -131,13 +110,16 @@ async function syncAudio(LIBRARY, SOME, QUESTIONS, CHEERS, GIGGLES) {
         entries.set(q.text, { kind: "question", speed: 1.07 });
 
     for (const row of LIBRARY) {
-        const [, name] = row.split("|");
-        const art = someSet.has(name)
+        const [, name, , sound] = row.split("|");
+        const art = SOME.has(name)
             ? "some"
             : /^[aeiou]/.test(name)
               ? "an"
               : "a";
         entries.set(`It's ${art} ${name}!`, { kind: "reveal", speed: 1.1 });
+        if (sound && sound !== "-") {
+            entries.set(sound, { kind: "cheer", speed: 1.08 });
+        }
     }
 
     await fs.mkdir(AUDIO_DIR, { recursive: true });
@@ -193,26 +175,5 @@ async function syncAudio(LIBRARY, SOME, QUESTIONS, CHEERS, GIGGLES) {
     );
 }
 
-async function main() {
-    const html = await fs.readFile("./index.html", "utf8");
-
-    const extractBlock = (pattern) => {
-        const m = html.match(pattern);
-        if (!m) throw new Error(`Could not find pattern: ${pattern}`);
-        return Function(`"use strict"; return (${m[1]});`)();
-    };
-
-    const LIBRARY = extractBlock(/const LIBRARY = (\[[\s\S]*?\]);/);
-    const SOME = extractBlock(/const SOME = new Set\((\[[\s\S]*?\])\);/);
-    const QUESTIONS = extractBlock(/const QUESTIONS = (\[[\s\S]*?\]);/);
-    const CHEERS = extractBlock(/const CHEERS = (\[[\s\S]*?\]);/);
-    const GIGGLES = extractBlock(/const GIGGLES = (\[[\s\S]*?\]);/);
-
-    await syncEmojis(LIBRARY);
-    await syncAudio(LIBRARY, SOME, QUESTIONS, CHEERS, GIGGLES);
-}
-
-main().catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+await syncEmojis();
+await syncAudio();
