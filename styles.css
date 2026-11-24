@@ -861,22 +861,24 @@ body[data-phase="reveal"] .reveal {
     }
 }
 
-/* ---------- iPad / Tablet Landscape Layout ---------- */
-@media (orientation: landscape) and (min-width: 700px) {
+/* ---------- Landscape Layout (Android Phones & Tablets) ---------- */
+@media (orientation: landscape) and (min-width: 560px) {
     .app {
         max-width: 1040px;
-        padding: 12px 24px 18px;
+        padding: 10px 20px 14px;
+        padding-left: max(20px, env(safe-area-inset-left, 0px));
+        padding-right: max(20px, env(safe-area-inset-right, 0px));
     }
     .prompt {
-        min-height: 54px;
+        min-height: 0;
     }
     body[data-phase="ask"] .play-area {
         flex-direction: row;
         align-items: stretch;
-        gap: 24px;
+        gap: 20px;
     }
     body[data-phase="ask"] .stage {
-        flex: 0 0 42%;
+        flex: 0 0 38%;
         min-height: 0;
     }
     body[data-phase="ask"] .panel {
@@ -892,7 +894,78 @@ body[data-phase="reveal"] .reveal {
     }
 }
 
-@media (max-height: 620px) {
+/* Compact phone landscape (~340px–440px viewport height) */
+@media (orientation: landscape) and (max-height: 500px) {
+    .app {
+        padding-top: 6px;
+        padding-bottom: 8px;
+    }
+    .bar {
+        min-height: 40px;
+    }
+    .round-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+    .logo {
+        font-size: 24px;
+    }
+    .prompt .big {
+        font-size: 22px;
+    }
+    .prompt .small {
+        display: none;
+    }
+    body[data-phase="ask"] .stage {
+        flex: 0 0 34%;
+    }
+    body[data-phase="ask"] .panel {
+        gap: 4px;
+    }
+    body[data-phase="ask"] .stars {
+        min-height: 18px;
+        font-size: 14px;
+    }
+    body[data-phase="ask"] .questions {
+        gap: 4px;
+        padding: 0 2px;
+    }
+    body[data-phase="ask"] .q {
+        min-height: 36px;
+        border-width: 2.5px;
+        border-radius: 12px;
+        box-shadow: 0 2px 0 var(--ink);
+    }
+    body[data-phase="ask"] .q-btn {
+        font-size: 16px;
+        padding: 2px 8px 2px 4px;
+        gap: 8px;
+    }
+    body[data-phase="ask"] .q .ic {
+        width: 28px;
+        height: 28px;
+        font-size: 17px;
+        border-radius: 8px;
+    }
+    body[data-phase="ask"] .q .repeat-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    body[data-phase="ask"] .q .answer {
+        font-size: 18px;
+    }
+    body[data-phase="ask"] .guessed {
+        font-size: 19px;
+        padding: 7px 14px;
+        border-radius: 15px;
+        box-shadow: 0 3px 0 var(--ink);
+    }
+}
+
+/* Very short portrait viewports */
+@media (orientation: portrait) and (max-height: 620px) {
     .prompt {
         min-height: 0;
     }

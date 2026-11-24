@@ -304,9 +304,9 @@ function layout() {
     const item = Math.round(Math.max(58, Math.min(92, m * 0.2)));
     stage.style.setProperty("--item", item + "px");
     const bagW =
-        phase === "hide"
-            ? Math.min(w * 0.4, h * 0.36, 220)
-            : Math.min(w * 0.48, h * 0.88, 220);
+      phase === "hide"
+          ? Math.min(w * 0.4, h * 0.36, 220)
+          : Math.min(w * 0.72, h * 0.82, 220);
     bag.style.setProperty("--bag-w", Math.max(90, bagW) + "px");
     document.documentElement.style.setProperty(
         "--bag-w",
